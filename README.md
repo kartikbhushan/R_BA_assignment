@@ -12,8 +12,8 @@
 
 
 # Task Distribution  - 
-1. Kartik - Data preprocessing
-2. Gaurav - Data Cleaning 
+1. Kartik - Data preprocessing - Prediction
+2. Gaurav - Data Cleaning - Prediction
 3. Krithika - EDA
 4. Ayushi - EDA
 
