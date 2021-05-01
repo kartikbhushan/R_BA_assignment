@@ -1,4 +1,4 @@
-# Food Waste Management - R Business Analysis Assignment
+# Food Preference Survey - R Business Analysis Assignment
 
 # Dates - 
 1. Data Cleaning Dates = 02-05-2000
