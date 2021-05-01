@@ -1,0 +1,165 @@
+---
+title: "Food Preference Survey"
+output: html_notebook
+---
+
+# Food Preference Survey
+
+##### This Survey was conducted among participants from different countries and demography. This will enable the resturant know the popularity of the food type among their residence at the resort.
+
+```{r}
+# Installing required libraries
+
+install.packages("tidyverse")
+install.packages("dplyr")
+install.packages("tidyr")
+install.packages("ggplot2")
+install.packages("gridExtra")
+install.packages("readr")
+install.packages("skimr")
+install.packages("caret")
+install.packages("e1071")
+```
+
+```{r}
+# Importing Libraries 
+
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gridExtra)
+
+# Data Importation:
+library(readr)
+
+# Summaries of Data:
+library(skimr)
+
+# Predictive Modeling/ML:
+library(caret)
+library(e1071)
+```
+
+```{r}
+food_survey <- read_csv("Food_survey.csv")
+```
+## Data Cleaning
+```{r}
+# Checking the provided sections
+str(food_survey)
+```
+
+```{r}
+# Check for duplicate Participant_IDs:
+sum(duplicated(food_survey$Participant_ID) == TRUE)
+```
+No duplicate Participant_IDs are present.
+```{r}
+# Delete Participant_ID column and Timestamp columns; they are unneeded.
+food_survey <- select(food_survey, -Timestamp)
+food_survey <- select(food_survey, -Participant_ID)
+head(food_survey)
+```
+
+```{r}
+skim(food_survey)
+```
+The Gender column contains 4 NA entries, according to the summary. 
+Lets check to see which rows in the dataframe contain NAs:
+```{r}
+food_survey[!complete.cases(food_survey),]
+```
+This confirms that all the NAs are in the Gender column. Lets Delete the rows containing NAs:
+```{r}
+food_survey <- na.omit(food_survey)
+```
+
+```{r}
+# See which Nationalities are represented:
+as.matrix(unique(food_survey$Nationality))
+```
+Some of the names in the Nationality column are misspelled or otherwise inconsistent.
+
+Let's make them consistent:
+```{r}
+# Nationality - Malaysian 
+food_survey$Nationality <- gsub("Malaysia", "Malaysian", food_survey$Nationality)
+food_survey$Nationality <- gsub("MALAYSIAN", "Malaysian", food_survey$Nationality)
+food_survey$Nationality <- gsub("Malaysiann", "Malaysian", food_survey$Nationality)
+food_survey$Nationality <- gsub("MY", "Malaysian", food_survey$Nationality)
+# Nationality - Indonesian
+food_survey$Nationality <- gsub("Indonesain", "Indonesian", food_survey$Nationality)
+food_survey$Nationality <- gsub("Indonesia", "Indonesian", food_survey$Nationality)
+food_survey$Nationality <- gsub("Indonesiann", "Indonesian", food_survey$Nationality)
+# Nationality - Pakistani
+food_survey$Nationality <- gsub("Pakistan", "Pakistani", food_survey$Nationality)
+food_survey$Nationality <- gsub("Pakistanii", "Pakistani", food_survey$Nationality)
+```
+
+```{r}
+as.matrix(unique(food_survey$Nationality))
+```
+Getting the count of all the nationality
+```{r}
+food_survey %>% count(Nationality, sort = TRUE)
+```
+Very few of the records correspond to non-Indian nationalities. Due to the severe class imbalance, we can consolidate these other nationalities into a single 'Non_Indian' class.
+
+
+## Data Visualization EDA
+```{r}
+## Let's graph the totals for the other categorical variables:
+
+food_survey %>% count(Food, sort = TRUE) -> Food_count
+Food_count %>% ggplot(aes(x = Food, y = n)) + geom_bar(stat = "identity") + geom_bar(stat = "identity", color = "#E69F00", fill = "#E69F00") + geom_text(aes(label=n), color="white", fontface = "bold", vjust = 1.5, size=5) -> Food_count_g
+
+food_survey %>% count(Juice, sort = TRUE) -> Juice_count
+Juice_count %>% ggplot(aes(x = Juice, y = n)) + geom_bar(stat = "identity") + geom_bar(stat = "identity", color = "#56B4E9", fill = "#56B4E9") + geom_text(aes(label=n), color="white", fontface = "bold", vjust = 1.5, size=5) -> Juice_count_g
+
+food_survey %>% count(Dessert, sort = TRUE) -> Dessert_count
+Dessert_count %>% ggplot(aes(x = Dessert, y = n)) + geom_bar(stat = "identity") + geom_bar(stat = "identity", color = "#FF6433", fill = "#FF6433") + geom_text(aes(label=n), color="white", fontface = "bold", vjust = 1.5, size=5) -> Dessert_count_g
+
+food_survey %>% count(Gender, sort = TRUE) -> Gender_count
+Gender_count %>% ggplot(aes(x = Gender, y = n)) + geom_bar(stat = "identity", color = "#2BD64D", fill = "#2BD64D") + geom_text(aes(label=n), color="white", fontface = "bold", vjust = 1.5, size=5) -> Gender_count_g
+
+grid.arrange(Food_count_g, Juice_count_g, Dessert_count_g, Gender_count_g)
+```
+Lets see if  Dessert more or less popular in the context of certain Food and Juice preferences? Let's examine normalized dessert data
+```{r}
+summary1 <- food_survey %>%
+        count(Food, Juice, Dessert, sort = TRUE)
+
+ggplot(summary1, aes(Juice, n, fill = Dessert)) + 
+        geom_bar(position = "fill" , stat = "identity", color = "black") +
+        facet_wrap(facets = vars(Food)) +
+        scale_fill_brewer(palette = "Accent") +
+        theme_bw() + scale_y_continuous(labels = scales::percent) +
+        ggtitle("Relative Popularity of Dessert per Food and Juice Preference") +
+       labs(y = NULL)
+
+#Try this if u need to add new colors
+#scale_fill_manual(values = c("#56B4E9", "#736F6E", "#FF6433", "#2BD64D"))
+
+#https://htmlcolorcodes.com/  --> to find manual good colors
+# http://rstudio-pubs-static.s3.amazonaws.com/5312_98fc1aba2d5740dd849a5ab797cc2c8d.html ---> Check for coloring 
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
