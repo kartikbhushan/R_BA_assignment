@@ -145,21 +145,65 @@ ggplot(summary1, aes(Juice, n, fill = Dessert)) +
 # http://rstudio-pubs-static.s3.amazonaws.com/5312_98fc1aba2d5740dd849a5ab797cc2c8d.html ---> Check for coloring 
 ```
 
+Convert Categorical Variable to Numeric
+
 ```{r}
+
+
+foodsur_m <- food_survey
+
+foodsur_m <- food_survey %>%
+        filter(Dessert == c("Yes", "No")) %>%
+        mutate_if(is.character, stringr::str_replace_all, pattern = 'Yes', replacement = 'Yes') %>% 
+        mutate_if(is.character, stringr::str_replace_all, pattern = 'No', replacement = 'No')
+
+foodsur_m <- foodsur_m %>%
+mutate(across(where(is.character), as.factor),
+      across(where(is.factor), as.numeric),
+      Dessert = factor(ifelse(Dessert == 0, "No", "Yes")))
+head(foodsur_m)
 ```
 
 ```{r}
+# Barplot
+bp<- ggplot(food_survey, aes(x="", y=Gender, fill=Nationality))+
+geom_bar(width = 1, stat = "identity")
+pie <- bp + coord_polar("y", start=0)
+pie + scale_fill_brewer(palette="Blues")+
+  theme_minimal()
 ```
 
 ```{r}
+res = cor(foodsur_m[,c(1,2,3,5)])
+res
 ```
 
 ```{r}
+# Histogram combines the dots, and the y axis now shows the actual count
+ggplot(foodsur_m,aes(x=Age)) + geom_histogram()
+```
+Heatmapping the median ages for each preference:
+
+```{r}
+food_surheatmap1 <- ggplot(data = food_survey, mapping = aes(x = Juice,
+                                                       y = Gender,
+                                                       fill = Age)) +
+  geom_tile() +
+  xlab(label = "Juice Preferance based on Gender and Median Age")
+
+food_surheatmap2 <- ggplot(data = food_survey, mapping = aes(x = Dessert,
+                                                       y = Gender,
+                                                       fill = Age)) +
+  geom_tile() +
+  xlab(label = "Dessert Preferance based on Gender and Median Age")
+
+
+food_surheatmap1
+
+
 ```
 
 ```{r}
-```
-
-```{r}
+food_surheatmap2
 ```
 
